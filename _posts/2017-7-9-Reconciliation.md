@@ -21,6 +21,14 @@ One of the main differences here is that when you're using the 3dCart API, you c
 
 Fortunately (for me at least!) for this project, the end goal was a daily email report, so the slow load time isn't relevant. 
 
+Quick side note on that the PHP mail function
+
+```php
+mail($to, $subject, $message, $headers);
+```
+
+wasn't working for me for some reason.
+
 This contrasts with the MWS system, which requires three separate steps to access the database. What you need to do is 
 
 1. Request a Report 
