@@ -88,8 +88,69 @@ Three - Use the Report ID that you received in step 2 to Access the Report
 $param['Action'] = 'GetReport';
 $param['ReportId'] = $reportId;
 ```
+<br />
 
-Working on a Linux system, my approach was to make a cron for Step 1. For my particular situation, it's enough to create a new report every twelve hours. Then, every time an email needs to be sent out (or the website is accessed), a script (list.php) is run that completes step 2, and parses out the most recent relevant report ID. This then allows another script (getAmazon.php) to access the report and create an Array of items with their relevant inventories. 
+Note that you can use the Amazon system to schedule when reports will be generated. 
+
+```php
+$param['Action'] = 'ManageReportSchedule';
+$param['ReportType'] = '_GET_FBA_MYI_UNSUPRRESSED_INVENTORY_DATA_';
+$param['Schedule'] = '_12_HOURS_';
+```
+
+For my particular situation, it's enough to create a new report every twelve hours. Then, every time an email needs to be sent out (or the website is accessed), a script (list.php) is run that completes step 2, and parses out the most recent relevant report ID. 
+
+To parse out the the relevant report ID, you should first divide the response from the server into different an array of the reports 
+
+```php
+$lines = explode("\n", $response);
+```
+
+Then define Constants that contain the keywords that identify the reports that you are looking for
+
+```php
+define("MMARKER", "MERCHANT");
+define("AMARKER", "AFN");
+define("UMARKER", "MYI");
+```
+
+So many caps, I'm not yelling at you! 
+
+You can then use PHP's strpos to see if a line contains the relevant marker. If it does, you can extract the ID.
+
+```php
+if (strpos($lines[0], MMARKER) !== false) {
+	$mReport = $lines[2];
+	$mDate = $lines[4];
+} // else ... repeat as necessary 
+```
+
+Note that I'm also grabbing the date of the report, so the user will know when the inventories were last updated.
+
+This then allows another script (getAmazon.php) to access the report and create an Array of items with their relevant inventories. Again, first create an array of the different lines from the response. Also create an array for storing the products.
+
+```php
+$splitContents = explode("\n", $response);
+$amazonArray = array();
+```
+
+Loop through the array. The information is tab delimited, so you can use explode to get an array of the different columns
+
+```php
+foreach ($splitContents as $line) {
+	$bits = explode("\t", $line);
+```
+
+The $amazonArray is set up where the key is the SKU and the value is the quantity. The SKU is the zero item of the array, where the quantity is in slot five. I used trim for the quantity to remove any whitespace. 
+
+```php
+$steve = $bits[0];
+$martin = trim($bits[5]);
+$amazonArray[$steve] = $martin;
+
+// close the foreach loop
+}
+```
 
 One thing that made this project tricky for me was matching the serial numbers. 3dCart has a parent SKU system-Let's say you have a shirt, and its part # is ABC-1852-RA. This 'parent SKU' can then be broken down into part numbers by inserting the size of the different shirts, leaving you with part numbers that look like ABC-1852-SM-RA or ABC-1852-XL-RA. 
 
