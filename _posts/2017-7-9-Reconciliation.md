@@ -27,7 +27,36 @@ Quick side note on that the PHP mail function
 mail($to, $subject, $message, $headers);
 ```
 
-wasn't working for me for some reason.
+wasn't working for me for some reason. Working on an AWS server, I found it eaiser to use Amazon's SES (simple email service.) 
+
+```php
+$headers = array (
+  'From' => SENDER,
+  'To' => RECIPIENT,
+  'Subject' => SUBJECT,   // );
+  'Content-type' => "text/html;charset=UTF-8",
+  'MIME-Version' => "1.0");
+
+$smtpParams = array (
+  'host' => HOST,
+  'port' => PORT,
+  'auth' => true,
+  'username' => USERNAME,
+  'password' => PASSWORD
+);
+
+ // Create an SMTP client.
+$mail = Mail::factory('smtp', $smtpParams);
+
+// Send the email.
+$result = $mail->send(RECIPIENT, $headers, BODY);
+
+if (PEAR::isError($result)) {
+  echo("Email not sent. " .$result->getMessage() ."\n");
+} else {
+  echo("Email sent!"."\n");
+}
+```
 
 This contrasts with the MWS system, which requires three separate steps to access the database. What you need to do is 
 
