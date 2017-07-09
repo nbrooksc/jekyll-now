@@ -3,17 +3,15 @@ layout: post
 title: Reconciling Inventory on 3dCart and Amazon MWS
 ---
 
-adventerra blog post
-
 I recently had the opportunity to build an inventory reconciliation app. Here's the basic idea- an e-commerce entrepreneur has a presence on 3dCart and Amazon. Until recently, he was tracking his inventories manually. Once a week, he would go through each website, writing down the inventory for each one of his dozens of products, most of which have different sizes. If there was an inconsistency, he'd need to figure out which number accurately reflected his stock. This was a time consuming and error prone process. 
 
 The stakes are high here. You don't want to sell a product that you don't have, and you also don't want to miss an opportunity to sell a product that you do have. 
 
 I've never looked at the APIs for Amazon or 3dCart, so this was a learning experience for me. I found the documentation to be okay. It was definitely good to get started, but some of the functionality was less than clear to me. As always, I recommend you start by looking over the documentation. 
 
-3dcart api - https://apirest.3dcart.com
+[3dcart API](https://apirest.3dcart.com)
 
-https://developer.amazonservices.com
+[MWS API](https://developer.amazonservices.com)
 
 Note that the Amazon API is referred to as MWS, for marketplace web service. This is to differentiate it from the ten thousand other things that Amazon does.
 
@@ -45,9 +43,9 @@ You need to be careful here because the SOAP API gives you direct access to your
 
 This was difficult for me to find, so let me share it here. 
 
-3dCart tables - https://drive.google.com/file/d/0B4LWoAow1QGLX3BuWUphSkNpTWc/view
+[3dCart tables](https://drive.google.com/file/d/0B4LWoAow1QGLX3BuWUphSkNpTWc/view)
 
-3dCart Table Structure - https://drive.google.com/file/d/0B4LWoAow1QGLWmhtSjRVNjIwS00/view
+[3dCart Table Structure](https://drive.google.com/file/d/0B4LWoAow1QGLWmhtSjRVNjIwS00/view)
 
 For me, the options_Advanced table ended up being the most useful. Using this table I was able to get every part number and its corresponding inventory. 
 
