@@ -1,6 +1,7 @@
 ---
 layout: post
-title: Reconciling Inventory on 3dCart and Amazon MWS---
+title: Reconciling Inventory on 3dCart and Amazon MWS
+---
 
 adventerra blog post
 
