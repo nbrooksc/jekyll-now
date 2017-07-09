@@ -65,14 +65,14 @@ $param = array();
 ```
 You can then populate the array with the relevant information based on the action that you're performing
 
-1. Request a Report
+One - Request a Report
 
 ```php
 $param['Action'] = 'RequestReport';
 $param['ReportType'] = '_GET_MERCHANT_LISTINGS_DATA_BACK_COMPAT_';
 ```
  
-2. Request a list of Reports-This list will (after a few seconds) include the report that you just requested. The list will include the Report's ID
+Two - Request a list of Reports-This list will (after a few seconds) include the report that you just requested. The list will include the Report's ID
 
 ```php
 $param['Action'] = 'GetReportList';
@@ -82,7 +82,7 @@ $param['ReportTypeList.Type.3'] = '_GET_FBA_MYI_UNSUPRRESSED_INVENTORY_DATA_';
 ```
 
 
-3. Use the Report ID that you received in step 2 to Access the Report
+Three - Use the Report ID that you received in step 2 to Access the Report
 
 ```php
 $param['Action'] = 'GetReport';
