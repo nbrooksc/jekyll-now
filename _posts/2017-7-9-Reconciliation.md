@@ -33,7 +33,7 @@ wasn't working for me for some reason. Working on an AWS server, I found it eais
 $headers = array (
   'From' => SENDER,
   'To' => RECIPIENT,
-  'Subject' => SUBJECT,   // );
+  'Subject' => SUBJECT,  
   'Content-type' => "text/html;charset=UTF-8",
   'MIME-Version' => "1.0");
 
@@ -58,11 +58,36 @@ if (PEAR::isError($result)) {
 }
 ```
 
-This contrasts with the MWS system, which requires three separate steps to access the database. What you need to do is 
+The straightforward 3dCart system contrasts with the MWS system, which requires three separate steps to access the database. Fortunately, all of these steps follow the same basic syntax. You'll need an array to contain the parameters. 
 
-1. Request a Report 
+```php
+$param = array();
+```
+You can then populate the array with the relevant information based on the action that you're performing
+
+1. Request a Report
+
+```php
+$param['Action'] = 'RequestReport';
+$param['ReportType'] = '_GET_MERCHANT_LISTINGS_DATA_BACK_COMPAT_';
+```
+ 
 2. Request a list of Reports-This list will (after a few seconds) include the report that you just requested. The list will include the Report's ID
+
+```php
+$param['Action'] = 'GetReportList';
+$param['ReportTypeList.Type.1'] = '_GET_MERCHANT_LISTINGS_DATA_BACK_COMPAT_';
+$param['ReportTypeList.Type.2'] = '_GET_AFN_INVENTORY_DATA_';
+$param['ReportTypeList.Type.3'] = '_GET_FBA_MYI_UNSUPRRESSED_INVENTORY_DATA_';
+```
+
+
 3. Use the Report ID that you received in step 2 to Access the Report
+
+```php
+$param['Action'] = 'GetReport';
+$param['ReportId'] = $reportId;
+```
 
 Working on a Linux system, my approach was to make a cron for Step 1. For my particular situation, it's enough to create a new report every twelve hours. Then, every time an email needs to be sent out (or the website is accessed), a script (list.php) is run that completes step 2, and parses out the most recent relevant report ID. This then allows another script (getAmazon.php) to access the report and create an Array of items with their relevant inventories. 
 
