@@ -10,10 +10,7 @@ Outside of programming I like to run half marathons, I'm addicted to sports, I'm
 
 General Competencies - PHP, Java, Javascript, Node.js, MySQL, iOS, Android, Express
 
-### More Information
-
-A place to include any other types of information that you'd like to include about yourself.
-
 ### Contact me
 
 [ncarson@iostream.xyz](mailto:ncarson@iostream.xyz)
+[LinkedIn](https://www.linkedin.com/in/nathan-carson-71206034/)
