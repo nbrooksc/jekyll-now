@@ -341,3 +341,5 @@ foreach($itemsArray as $one => $two) {
 ```
 
 The important site is uneven.php, which displays only the products with uneven inventories. 
+
+This project took a while to complete, but it's good to be familiar with the APIs that prop up modern e-commerce sites.
