@@ -289,6 +289,55 @@ We can now combine these arrays into an object. item.php defines this class- the
 
 Using the $nameArray from the 3dCart REST API, we can then create an array of these items where the key is the product name. 
 
+```php
+ // Array to contain all of the products
+  // key will be the name, value will be
+  // an object that contains part # and stock info 
+  $itemsArray = array();
+
+  // initialize each element of the array
+  forEach ($nameArray as $one=> $two) {
+    $itemsArray[$two] = array();
+  }
+```
+
 I created one site, reconcile3.php, that prints the entire array in HTML tables. This was only used for me for debugging. 
+
+```php
+// display array using HTML tables
+
+foreach($itemsArray as $one => $two) {
+
+    // check to see if there are any
+    // actual products associated with the name    
+
+    if (!empty($two)) {
+      echo "<br><br>";
+      echo "<table>";
+      echo "<caption><h2>$one</h2></caption>";
+      echo "<tr>";
+      echo "<th>Part #</th>";
+      echo "<th>3dCart Inventory</th>";
+      echo "<th>FBA Inventory</th>";
+      echo "<th>Amazon Merchant Inventory</th>";
+      echo "</tr>";
+
+      foreach($two as $three => $four) {
+        $rDub = $four->get_part();
+        $fIn = $four->get_f();
+        $cIn = $four->get_c();
+        $mIn = $four->get_m();
+
+        echo "<tr>";
+        echo "<td style='text-align:left;'>$rDub</td>";
+        echo "<td>$cIn</td>";
+        echo "<td>$fIn</td>";
+        echo "<td>$mIn</td>";
+        echo "</tr>";
+      }
+      echo "</table>";
+    }
+  }
+```
 
 The important site is uneven.php, which displays only the products with uneven inventories. 
