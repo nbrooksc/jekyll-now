@@ -12,5 +12,6 @@ General Competencies - PHP, Java, Javascript, Node.js, MySQL, iOS, Android, Expr
 
 ### Contact me
 
-[ncarson@iostream.xyz](mailto:ncarson@iostream.xyz)
 [LinkedIn](https://www.linkedin.com/in/nathan-carson-71206034/)
+
+[ncarson@iostream.xyz](mailto:ncarson@iostream.xyz)
