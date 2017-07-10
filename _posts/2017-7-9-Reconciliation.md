@@ -156,21 +156,82 @@ One thing that made this project tricky for me was matching the serial numbers. 
 
 Seems logical, right? The problem for me was that it wasn't consistent. One product might insert a hyphen before the size, while another may not. The size would usually be the penultimate piece of information in the string, except that sometimes it wasn't. I ended up creating a gauntlet of functions to push the part # number through to match it to its parent SKU.
 
+For example- 
+
+```php
+function digitStrip($partNumber) {
+	// Array of characters. By removing these characters, 
+	// we may be able to get the part# to equal the SKU
+	
+	$bad = array("l", "L", "m", "s", "S", "M", "X", "x");
+	$newName = str_replace($bad, "", $partNumber);
+	
+	return $newName;
+}
+```
+
+You can see the rest in the functions.php script in the repository 
+
 Matching the Part numbers with the Parent SKUs was necessary to create a logical and user friendly interface. 
 
 I wasn't able to get the relevant information from the standard 3dCart Rest API. This was disappointing to me. I could get the Product Name and the Quantity, but it was divided by Parent SKU. I don't know who this would be useful to-It doesn't help to know that you have 8 Black shirts in stock if you don't know how many are medium and how many are large.
 
 To solve this issue I turned to the advanced, or SOAP API. I wasn't able to find much information on this online, it looks to me that you can still use it but they don't really advertise it. It kind of felt like ordering off the secret menu at a fast food place.
 
-You need to be careful here because the SOAP API gives you direct access to your client's database. This is very powerful. 
+```php
+// Create array for relevant information and
+// Connect through soap
 
-This was difficult for me to find, so let me share it here. 
+$params = array(
+	'storeUrl' => 'your.secure-url.here',
+	'userKey' => 'your unique user key here'
+);
+
+$db = new soapclient('http://api.3dcart.com/cart_advanced.asmx?WSDL', array('trace', => 1, 'soap_version' => SOAP_1_1));
+```
+
+Quick note - Don't take it for granted that your PHP Installation has soap installed. If it doesn't, you won't be able to call the soapclient() function. You package manager (yum, Entropy, etc) should be able to resolve any issue. 
+
+You need to be careful here because the SOAP API gives you direct access to your client's database. This is very powerful. At the same time, using this API will be very straightforward provided that you're familiar with SQL syntax. 
+
+```php
+// Retrieve the product list
+$result = $db->runQuery($params + array(
+  'sqlStatement' => "SELECT * FROM options_Advanced"
+));
+```
+
+Information on the Soap API  was difficult for me to find, so let me share it here. 
 
 [3dCart tables](https://drive.google.com/file/d/0B4LWoAow1QGLX3BuWUphSkNpTWc/view)
 
 [3dCart Table Structure](https://drive.google.com/file/d/0B4LWoAow1QGLWmhtSjRVNjIwS00/view)
 
 For me, the options_Advanced table ended up being the most useful. Using this table I was able to get every part number and its corresponding inventory. 
+
+Once you've run the query, you'll have an XML result. I have more experience dealing with JSON so this took a minute for me to grok. 
+
+Note that the array follows the same structure (SKU for Key, quantity for Value) as the Amazon Array
+
+```php
+  $sxe = new SimpleXMLElement($result->runQueryResult->any);
+
+  // array for storing the result
+  // key = part# value = quantity 
+  $cartArray = array();
+
+  // Cycle through result, grab relevant metrics
+  // Throw them into array
+  if (!empty($sxe->runQueryRecord)) {
+    foreach ($sxe->runQueryRecord as $record) {
+      $part = (string) $record->AO_Sufix;
+      $quantity = (string) $record->AO_Stock;
+      $part = trim($part);
+      $cartArray[$part] = $quantity;
+    }
+  }
+```
+
 
 I still needed to query the REST API to get the product name. Without the product name the email report would just be a a list of serial numbers-not very useful! 
 
@@ -179,11 +240,52 @@ Amazon was generally more straightforward to me. The biggest thing here is to th
 1. Talk to your client about how he or she uses Amazon and where the inventory is. 
 2. Use the _GET_FBA_MYI_UNSUPPRESSED_INVENTORY_DATA_ report. This single report contained all of the inventory from the various categories. 
 
-Also note that the Amazon Reports are tab delimited. For PHP, the easiest way for me to parse this was to explode by \n to get the different entries, then to explode the entries by \t to get the columns. 
-
 So now each site has an array with the key being the part number and the value being the inventory for that site.
 
 We can now combine these arrays into an object. item.php defines this class- there are properties for the part number, the cart inventory total, the FBA inventory total, and the merchant fulfilled inventory. Note that there is also a function to return a boolean based on whether or not the inventories match up. 
+
+```php
+<?php # item.php
+      # create class for storing 
+      # products
+  
+  class item {
+    var $partNumber;
+    var $fInventory;
+    var $cInventory;
+    var $mInventory;
+    
+    function __construct($pNumber, $fIn, $cIn, $mIn) {
+      $this->partNumber = $pNumber;
+      $this->fInventory = $fIn;
+      $this->cInventory = $cIn;
+      $this->mInventory = $mIn;
+    }
+  function isEven() {
+      $amazonInventory = 0;
+      if (is_numeric($this->fInventory)) {
+        $amazonInventory += $this->fInventory;
+      }
+
+      if (is_numeric($this->mInventory)) {
+        $amazonInventory += $this->mInventory;
+      }
+
+      // Adding step to remove strange -1 inventory
+      // from 3dCart
+
+      $cartIn = ($this->cInventory > 0) ? $this->cInventory : 0;
+
+
+      if ($amazonInventory == $cartIn) {
+        return true;
+      }
+
+      return false;
+    }
+  }
+?>
+```
 
 Using the $nameArray from the 3dCart REST API, we can then create an array of these items where the key is the product name. 
 
